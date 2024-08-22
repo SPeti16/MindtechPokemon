@@ -87,13 +87,13 @@ fun InfoScreen(
                 }
             } else {
                 AsyncImage(
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxWidth(),
                     model = ImageRequest.Builder(context = LocalContext.current)
                         .data(pokemon.sprites.front_default)
                         .crossfade(true)
                         .build(),
                     contentDescription = pokemon.name,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                     error = painterResource(R.drawable.pokemon),
                     placeholder = painterResource(R.drawable.pokemon),
                 )

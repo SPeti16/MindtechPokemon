@@ -1,5 +1,7 @@
 package com.example.mindtechpokemon.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +43,7 @@ import com.example.mindtechpokemon.ui.AppViewModelProvider
 import com.example.mindtechpokemon.ui.navigation.NavigationDestination
 import com.example.mindtechpokemon.ui.screens.view_model.HomeViewModel
 import com.example.mindtechpokemon.ui.theme.PokemonTopAppBar
+import kotlin.math.round
 
 object HomeDestination : NavigationDestination {
     override val route = "home"
@@ -75,76 +81,106 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TextField(
-                value = searchPokemon,
-                onValueChange = { viewModel.updateSearchPokemon(it) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = android.R.drawable.ic_menu_search),
-                        contentDescription = "Search Icon",
-                        tint = Color.Gray
+            if (pokemonList.isEmpty()) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                TextField(
+                    value = searchPokemon,
+                    onValueChange = { viewModel.updateSearchPokemon(it) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_search),
+                            contentDescription = "Search Icon",
+                            tint = Color.Gray
+                        )
+                    },
+                    //placeholder = { Text("") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent
                     )
-                },
-                //placeholder = { Text("") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent
                 )
-            )
-            Spacer(Modifier.height(4.dp))
-            Text("Pokemon Types")
-            Spacer(Modifier.height(4.dp))
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)) {
-                Column {
-                    Text(
-                        text = if(selectedType=="")"Select..." else selectedType,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { viewModel.updateExpanded(true) }
-                            .padding(16.dp)
-                    )
+                Spacer(Modifier.height(4.dp))
+                Text("Pokemon Types")
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Column {
+                        Text(
+                            text = if (selectedType == "") "Select..." else selectedType,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.updateExpanded(true) }
+                                .padding(16.dp)
+                        )
 
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { viewModel.updateExpanded(false)
-                            viewModel.updateSelectedType("")}
-                    ) {
-                        types.results.forEach { type ->
-                            DropdownMenuItem(
-                                text = { Text(text = type.name) },
-                                onClick = {
-                                    viewModel.updateSelectedType(type.name)
-                                    viewModel.updateExpanded(false)
-                                }
-                            )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = {
+                                viewModel.updateExpanded(false)
+                                viewModel.updateSelectedType("")
+                            }
+                        ) {
+                            types.results.forEach { type ->
+                                DropdownMenuItem(
+                                    text = { Text(text = type.name) },
+                                    onClick = {
+                                        viewModel.updateSelectedType(type.name)
+                                        viewModel.updateExpanded(false)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-            }
-            Spacer(Modifier.height(4.dp))
-            LazyColumn (modifier = Modifier.fillMaxSize()){
-                items(pokemonList.size) { i ->
-                    if((searchPokemon=="" || pokemonList[i].name.contains(searchPokemon))&&
-                        (selectedType=="" || pokemonList[i].types[0].type.name==selectedType))
-                    Row (modifier = Modifier.fillMaxWidth()){
-                        Card (modifier = Modifier.weight(3F),
-                            onClick = {
-                                viewModel.saveData(pokemonList[i])
-                                info()
-                            }){
-                            Row (modifier = Modifier.fillMaxWidth()){
-                                Text(modifier = Modifier.weight(1F), text = pokemonList[i].name)
-                                Text(modifier = Modifier.weight(1F),text = pokemonList[i].types[0].type.name)
-                                Text(modifier = Modifier.weight(1F),text = "-")
+                Spacer(Modifier.height(4.dp))
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                        .background(Color(0xFFADD8E6))
+                ) {
+                    items(pokemonList.size) { i ->
+                        if ((searchPokemon == "" || pokemonList[i].name.contains(searchPokemon)) &&
+                            (selectedType == "" || pokemonList[i].types[0].type.name == selectedType)
+                        )
+                            Row(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Card(modifier = Modifier.weight(3F),
+                                    onClick = {
+                                        viewModel.saveData(pokemonList[i])
+                                        info()
+                                    }) {
+                                    Row(modifier = Modifier
+                                        .background(Color.White)
+                                        .border(width = 1.dp, color = Color.Blue, shape = RoundedCornerShape(16.dp))
+                                        .fillMaxWidth()
+
+                                    ) {
+                                        Text(
+                                            modifier = Modifier.weight(1F).padding(4.dp),
+                                            text = pokemonList[i].name
+                                        )
+                                        Text(
+                                            modifier = Modifier.weight(1F).padding(4.dp),
+                                            text = pokemonList[i].types[0].type.name
+                                        )
+                                        Text(modifier = Modifier.weight(1F).padding(4.dp), text = "-")
+                                    }
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                Button(modifier = Modifier.weight(1F), onClick = { /*TODO*/ }) {
+                                    Text(text = "Catch")
+                                }
                             }
-                        }
-                        Button(modifier = Modifier.weight(1F), onClick = { /*TODO*/ }) {
-                            Text(text = "Catch")
-                        }
+                        Spacer(Modifier.height(8.dp))
                     }
                 }
             }
